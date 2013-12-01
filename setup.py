@@ -46,7 +46,5 @@ setup(name='isort',
       license="MIT",
       scripts=['scripts/isort'],
       packages=['isort'],
-      requires=['pies', 'natsort'],
-      install_requires=['pies>=2.0.0', 'natsort>=3.0.0'],
       cmdclass={'test': PyTest},
       **PyTest.extra_kwargs)

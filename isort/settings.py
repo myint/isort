@@ -27,8 +27,6 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 import os
 from collections import namedtuple
 
-from pies.overrides import *
-
 MAX_CONFIG_SEARCH_DEPTH = 20 # The number '..' directories isort will look for config file within
 
 WrapModes = ('GRID', 'VERTICAL', 'HANGING_INDENT', 'VERTICAL_HANGING_INDENT', 'VERTICAL_GRID', 'VERTICAL_GRID_GROUPED')

@@ -29,6 +29,7 @@ from __future__ import absolute_import, division, print_function, unicode_litera
 
 import codecs
 import copy
+import io
 import itertools
 import os
 import os.path
@@ -36,9 +37,6 @@ from collections import namedtuple
 from difflib import unified_diff
 from sys import path as PYTHONPATH
 from sys import stderr, stdout
-
-from natsort import natsorted
-from pies.overrides import *
 
 from . import settings
 
@@ -67,9 +65,8 @@ class SortImports(object):
                 file_contents = None
             else:
                 self.file_path = file_path
-                with open(file_path) as file_to_import_sort:
+                with io.open(file_path, encoding='utf-8') as file_to_import_sort:
                     file_contents = file_to_import_sort.read()
-                    file_contents = PY2 and file_contents.decode('utf8') or file_contents
 
         if file_contents is None or ("isort:" + "skip_file") in file_contents:
             return
@@ -196,7 +193,7 @@ class SortImports(object):
         output = []
         for section in itertools.chain(SECTIONS, self.config['forced_separate']):
             straight_modules = list(self.imports[section]['straight'])
-            straight_modules = natsorted(straight_modules, key=lambda key: self._module_key(key, self.config))
+            straight_modules = sorted(straight_modules, key=lambda key: self._module_key(key, self.config))
 
             for module in straight_modules:
                 if module in self.config['remove_imports']:
@@ -208,14 +205,14 @@ class SortImports(object):
                     output.append("import {0}".format(module))
 
             from_modules = list(self.imports[section]['from'].keys())
-            from_modules = natsorted(from_modules, key=lambda key: self._module_key(key, self.config))
+            from_modules = sorted(from_modules, key=lambda key: self._module_key(key, self.config))
             for module in from_modules:
                 if module in self.config['remove_imports']:
                     continue
 
                 import_start = "from {0} import ".format(module)
                 from_imports = list(self.imports[section]['from'][module])
-                from_imports = natsorted(from_imports, key=lambda key: self._module_key(key, self.config))
+                from_imports = sorted(from_imports, key=lambda key: self._module_key(key, self.config))
                 if self.config['remove_imports']:
                     from_imports = [line for line in from_imports if not "{0}.{1}".format(module, line) in
                                     self.config['remove_imports']]

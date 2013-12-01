@@ -5,8 +5,7 @@
 from __future__ import absolute_import, division, print_function, unicode_literals
 
 import argparse
-
-from pies.overrides import *
+import sys
 
 from isort import __version__, SortImports, SECTION_NAMES
 
@@ -47,7 +46,7 @@ parser.add_argument('-df', '--diff', dest='show_diff', default=False, action='st
                     help="Prints a diff of all the changes isort would make to a file, instead of changing it in place")
 parser.add_argument('-v', '--version', action='version', version='isort {0}'.format(__version__))
 
-arguments = dict((key, value) for (key, value) in itemsview(vars(parser.parse_args())) if value)
+arguments = dict((key, value) for (key, value) in vars(parser.parse_args()).items() if value)
 file_names = arguments.pop('files', [])
 
 if file_names == ['-']:
