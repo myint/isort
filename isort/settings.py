@@ -71,7 +71,6 @@ default = {'force_to_top': [],
            'length_sort': False,
            'add_imports': [],
            'remove_imports': [],
-           'force_single_line': False,
            'default_section': 'FIRSTPARTY'}
 
 try:

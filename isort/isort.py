@@ -256,29 +256,11 @@ class SortImports(object):
                 if from_imports:
                     if '*' in from_imports:
                         import_statement = '{0}*'.format(import_start)
-                    elif self.config['force_single_line']:
+                    else:
                         import_statement = import_start + from_imports.pop(0)
                         for from_import in from_imports:
                             import_statement += '\n{0}{1}'.format(import_start,
                                                                   from_import)
-                    else:
-                        import_statement = import_start + \
-                            (', ').join(from_imports)
-                        if len(import_statement) > self.config['line_length'] and len(from_imports) > 1:
-                            output_mode = settings.WrapModes._fields[
-                                self.config.get(
-                                    'multi_line_output',
-                                    0)].lower(
-                            )
-                            formatter = getattr(
-                                self,
-                                '_output_' +
-                                output_mode,
-                                self._output_grid)
-                            import_statement = formatter(
-                                import_start, from_imports, ' ' *
-                                (len(import_start) + 1),
-                                self.config['indent'], self.config['line_length'])
 
                     output.append(import_statement)
 
