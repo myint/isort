@@ -11,23 +11,30 @@ or:
 
 Copyright (C) 2013  Timothy Edmund Crosley
 
-Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated
-documentation files (the "Software"), to deal in the Software without restriction, including without limitation
-the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and
-to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+Permission is hereby granted, free of charge, to any person obtaining a copy of
+this software and associated documentation files (the "Software"), to deal in
+the Software without restriction, including without limitation the rights to
+use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies
+of the Software, and to permit persons to whom the Software is furnished to do
+so, subject to the following conditions:
 
-The above copyright notice and this permission notice shall be included in all copies or
-substantial portions of the Software.
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
 
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED
-TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
-THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF
-CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
-OTHER DEALINGS IN THE SOFTWARE.
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
 
 """
 
-from __future__ import absolute_import, division, print_function, unicode_literals
+from __future__ import absolute_import
+from __future__ import division
+from __future__ import print_function
+from __future__ import unicode_literals
 
 import argparse
 import codecs
@@ -36,12 +43,12 @@ import io
 import itertools
 import os
 import os.path
+import sys
 from collections import namedtuple
 from difflib import unified_diff
 from sys import path as PYTHONPATH
-from sys import stderr, stdout
-import sys
-
+from sys import stderr
+from sys import stdout
 
 __version__ = '2.6.0'
 
@@ -63,25 +70,32 @@ WrapModes = namedtuple('WrapModes', WrapModes)(*range(len(WrapModes)))
 default = {'force_to_top': [],
            'skip': ['__init__.py', ],
            'line_length': 80,
-           'known_standard_library': ['abc', 'anydbm', 'argparse', 'array', 'asynchat', 'asyncore', 'atexit', 'base64',
-                                      'BaseHTTPServer', 'bisect', 'bz2', 'calendar', 'cgitb', 'cmd', 'codecs',
-                                      'collections', 'commands', 'compileall', 'ConfigParser', 'contextlib', 'Cookie',
-                                      'copy', 'cPickle', 'cProfile', 'cStringIO', 'csv', 'datetime', 'dbhash', 'dbm',
-                                      'decimal', 'difflib', 'dircache', 'dis', 'doctest', 'dumbdbm', 'EasyDialogs',
-                                      'errno', 'exceptions', 'filecmp', 'fileinput', 'fnmatch', 'fractions',
-                                      'functools', 'gc', 'gdbm', 'getopt', 'getpass', 'gettext', 'glob', 'grp', 'gzip',
-                                      'hashlib', 'heapq', 'hmac', 'imaplib', 'imp', 'inspect', 'itertools', 'json',
-                                      'linecache', 'locale', 'logging', 'mailbox', 'math', 'mhlib', 'mmap',
-                                      'multiprocessing', 'operator', 'optparse', 'os', 'pdb', 'pickle', 'pipes',
-                                      'pkgutil', 'platform', 'plistlib', 'pprint', 'profile', 'pstats', 'pwd', 'pyclbr',
-                                      'pydoc', 'Queue', 'random', 're', 'readline', 'resource', 'rlcompleter',
-                                      'robotparser', 'sched', 'select', 'shelve', 'shlex', 'shutil', 'signal',
-                                      'SimpleXMLRPCServer', 'site', 'sitecustomize', 'smtpd', 'smtplib', 'socket',
-                                      'SocketServer', 'sqlite3', 'string', 'StringIO', 'struct', 'subprocess', 'sys',
-                                      'sysconfig', 'tabnanny', 'tarfile', 'tempfile', 'textwrap', 'threading', 'time',
-                                      'timeit', 'trace', 'traceback', 'unittest', 'urllib', 'urllib2', 'urlparse',
-                                      'usercustomize', 'uuid', 'warnings', 'weakref', 'webbrowser', 'whichdb', 'xml',
-                                      'xmlrpclib', 'zipfile', 'zipimport', 'zlib'],
+           'known_standard_library': [
+               'abc', 'anydbm', 'argparse', 'array', 'asynchat', 'asyncore',
+               'atexit', 'base64', 'BaseHTTPServer', 'bisect', 'bz2',
+               'calendar', 'cgitb', 'cmd', 'codecs', 'collections', 'commands',
+               'compileall', 'ConfigParser', 'contextlib', 'Cookie', 'copy',
+               'cPickle', 'cProfile', 'cStringIO', 'csv', 'datetime', 'dbhash',
+               'dbm', 'decimal', 'difflib', 'dircache', 'dis', 'doctest',
+               'dumbdbm', 'EasyDialogs', 'errno', 'exceptions', 'filecmp',
+               'fileinput', 'fnmatch', 'fractions', 'functools', 'gc', 'gdbm',
+               'getopt', 'getpass', 'gettext', 'glob', 'grp', 'gzip',
+               'hashlib', 'heapq', 'hmac', 'imaplib', 'imp', 'inspect',
+               'itertools', 'json', 'linecache', 'locale', 'logging',
+               'mailbox', 'math', 'mhlib', 'mmap', 'multiprocessing',
+               'operator', 'optparse', 'os', 'pdb', 'pickle', 'pipes',
+               'pkgutil', 'platform', 'plistlib', 'pprint', 'profile',
+               'pstats', 'pwd', 'pyclbr', 'pydoc', 'Queue', 'random', 're',
+               'readline', 'resource', 'rlcompleter', 'robotparser', 'sched',
+               'select', 'shelve', 'shlex', 'shutil', 'signal',
+               'SimpleXMLRPCServer', 'site', 'sitecustomize', 'smtpd',
+               'smtplib', 'socket', 'SocketServer', 'sqlite3', 'string',
+               'StringIO', 'struct', 'subprocess', 'sys', 'sysconfig',
+               'tabnanny', 'tarfile', 'tempfile', 'textwrap', 'threading',
+               'time', 'timeit', 'trace', 'traceback', 'unittest', 'urllib',
+               'urllib2', 'urlparse', 'usercustomize', 'uuid', 'warnings',
+               'weakref', 'webbrowser', 'whichdb', 'xml', 'xmlrpclib',
+               'zipfile', 'zipimport', 'zlib'],
            'known_third_party': ['google.appengine.api'],
            'known_first_party': [],
            'multi_line_output': WrapModes.GRID,
@@ -97,9 +111,9 @@ class SortImports(object):
     config = default
     incorrectly_sorted = False
 
-    def __init__(
-            self, file_path=None, file_contents=None, write_to_stdout=False, check=False,
-            show_diff=False, **setting_overrides):
+    def __init__( self, file_path=None, file_contents=None,
+                 write_to_stdout=False, check=False, show_diff=False,
+                 **setting_overrides):
         if setting_overrides:
             self.config = default.copy()
             self.config.update(setting_overrides)
@@ -112,13 +126,14 @@ class SortImports(object):
                 file_name = file_name[file_name.rfind('/') + 1:]
             if file_name in self.config['skip']:
                 print(
-                    "WARNING: {0} was skipped as it's listed in 'skip' setting".format(
-                        file_path),
+                    "WARNING: {0} was skipped as it's listed in 'skip' "
+                    "setting".format(file_path),
                     file=stderr)
                 file_contents = None
             else:
                 self.file_path = file_path
-                with io.open(file_path, encoding='utf-8') as file_to_import_sort:
+                with io.open(file_path,
+                             encoding='utf-8') as file_to_import_sort:
                     file_contents = file_to_import_sort.read()
 
         if file_contents is None or ('isort:' + 'skip_file') in file_contents:
@@ -133,7 +148,8 @@ class SortImports(object):
         self.out_lines = []
         self.imports = {}
         self.as_map = {}
-        for section in itertools.chain(SECTIONS, self.config['forced_separate']):
+        for section in itertools.chain(SECTIONS,
+                                       self.config['forced_separate']):
             self.imports[section] = {'straight': set(), 'from': {}}
 
         self.index = 0
@@ -151,7 +167,8 @@ class SortImports(object):
         if check:
             if self.output == file_contents:
                 print(
-                    'SUCCESS: {0} Everything Looks Good!'.format(self.file_path))
+                    'SUCCESS: {0} Everything Looks Good!'.format(
+                        self.file_path))
             else:
                 print(
                     'ERROR: {0} Imports are incorrectly sorted.'.format(
@@ -163,7 +180,8 @@ class SortImports(object):
         if show_diff:
             for line in unified_diff(
                     file_contents.splitlines(1), self.output.splitlines(1),
-                    fromfile=self.file_path + ':before', tofile=self.file_path + ':after'):
+                    fromfile=self.file_path + ':before',
+                    tofile=self.file_path + ':after'):
                 stdout.write(line)
         elif write_to_stdout:
             stdout.write(self.output)
@@ -194,16 +212,20 @@ class SortImports(object):
         elif moduleName in self.config['known_standard_library'] or \
                 (firstPart in self.config['known_standard_library']):
             return SECTIONS.STDLIB
-        elif moduleName in self.config['known_third_party'] or (firstPart in self.config['known_third_party']):
+        elif ((moduleName in self.config['known_third_party']) or
+              (firstPart in self.config['known_third_party'])):
             return SECTIONS.THIRDPARTY
-        elif moduleName in self.config['known_first_party'] or (firstPart in self.config['known_first_party']):
+        elif ((moduleName in self.config['known_first_party']) or
+              (firstPart in self.config['known_first_party'])):
             return SECTIONS.FIRSTPARTY
 
         for prefix in PYTHONPATH:
             module_path = '/'.join((prefix, moduleName.replace('.', '/')))
             package_path = '/'.join((prefix, moduleName.split('.')[0]))
-            if (os.path.exists(module_path + '.py') or os.path.exists(module_path + '.so') or
-               (os.path.exists(package_path) and os.path.isdir(package_path))):
+            if (os.path.exists(module_path + '.py') or
+                os.path.exists(module_path + '.so') or
+                (os.path.exists(package_path) and
+                 os.path.isdir(package_path))):
                 if 'site-packages' in prefix or 'dist-packages' in prefix:
                     return SECTIONS.THIRDPARTY
                 elif 'python2' in prefix.lower() or 'python3' in prefix.lower():
@@ -538,8 +560,9 @@ def main():
     parser.add_argument(
         '--indent', help='String to place for indents defaults to "    " (4 spaces).',
         dest='indent', type=str)
-    parser.add_argument('-a', '--add_import', dest='add_imports', action='append',
-                        help='Adds the specified import line to all files, automatically determining correct placement.')
+    parser.add_argument(
+        '-a', '--add_import', dest='add_imports', action='append',
+        help='Adds the specified import line to all files, automatically determining correct placement.')
     parser.add_argument(
         '-r', '--remove_import', dest='remove_imports', action='append',
         help='Removes the specified import from all files.')
