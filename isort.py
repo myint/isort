@@ -1,3 +1,5 @@
+#!/usr/bin/env python
+
 """isort.py.
 
 Exposes a simple library to sort through imports within Python code
@@ -27,6 +29,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 from __future__ import absolute_import, division, print_function, unicode_literals
 
+import argparse
 import codecs
 import copy
 import io
@@ -37,22 +40,68 @@ from collections import namedtuple
 from difflib import unified_diff
 from sys import path as PYTHONPATH
 from sys import stderr, stdout
+import sys
 
-from . import settings
+
+__version__ = '2.6.0'
+
 
 SECTION_NAMES = ('FUTURE', 'STDLIB', 'THIRDPARTY', 'FIRSTPARTY', 'LOCALFOLDER')
 SECTIONS = namedtuple('Sections', SECTION_NAMES)(*range(len(SECTION_NAMES)))
 
+WrapModes = (
+    'GRID',
+    'VERTICAL',
+    'HANGING_INDENT',
+    'VERTICAL_HANGING_INDENT',
+    'VERTICAL_GRID',
+    'VERTICAL_GRID_GROUPED')
+WrapModes = namedtuple('WrapModes', WrapModes)(*range(len(WrapModes)))
+
+# Note that none of these lists must be complete as they are simply
+# fallbacks for when included auto-detection fails.
+default = {'force_to_top': [],
+           'skip': ['__init__.py', ],
+           'line_length': 80,
+           'known_standard_library': ['abc', 'anydbm', 'argparse', 'array', 'asynchat', 'asyncore', 'atexit', 'base64',
+                                      'BaseHTTPServer', 'bisect', 'bz2', 'calendar', 'cgitb', 'cmd', 'codecs',
+                                      'collections', 'commands', 'compileall', 'ConfigParser', 'contextlib', 'Cookie',
+                                      'copy', 'cPickle', 'cProfile', 'cStringIO', 'csv', 'datetime', 'dbhash', 'dbm',
+                                      'decimal', 'difflib', 'dircache', 'dis', 'doctest', 'dumbdbm', 'EasyDialogs',
+                                      'errno', 'exceptions', 'filecmp', 'fileinput', 'fnmatch', 'fractions',
+                                      'functools', 'gc', 'gdbm', 'getopt', 'getpass', 'gettext', 'glob', 'grp', 'gzip',
+                                      'hashlib', 'heapq', 'hmac', 'imaplib', 'imp', 'inspect', 'itertools', 'json',
+                                      'linecache', 'locale', 'logging', 'mailbox', 'math', 'mhlib', 'mmap',
+                                      'multiprocessing', 'operator', 'optparse', 'os', 'pdb', 'pickle', 'pipes',
+                                      'pkgutil', 'platform', 'plistlib', 'pprint', 'profile', 'pstats', 'pwd', 'pyclbr',
+                                      'pydoc', 'Queue', 'random', 're', 'readline', 'resource', 'rlcompleter',
+                                      'robotparser', 'sched', 'select', 'shelve', 'shlex', 'shutil', 'signal',
+                                      'SimpleXMLRPCServer', 'site', 'sitecustomize', 'smtpd', 'smtplib', 'socket',
+                                      'SocketServer', 'sqlite3', 'string', 'StringIO', 'struct', 'subprocess', 'sys',
+                                      'sysconfig', 'tabnanny', 'tarfile', 'tempfile', 'textwrap', 'threading', 'time',
+                                      'timeit', 'trace', 'traceback', 'unittest', 'urllib', 'urllib2', 'urlparse',
+                                      'usercustomize', 'uuid', 'warnings', 'weakref', 'webbrowser', 'whichdb', 'xml',
+                                      'xmlrpclib', 'zipfile', 'zipimport', 'zlib'],
+           'known_third_party': ['google.appengine.api'],
+           'known_first_party': [],
+           'multi_line_output': WrapModes.GRID,
+           'forced_separate': [],
+           'indent': ' ' * 4,
+           'length_sort': False,
+           'add_imports': [],
+           'remove_imports': [],
+           'default_section': 'FIRSTPARTY'}
+
 
 class SortImports(object):
-    config = settings.default
+    config = default
     incorrectly_sorted = False
 
     def __init__(
             self, file_path=None, file_contents=None, write_to_stdout=False, check=False,
             show_diff=False, **setting_overrides):
         if setting_overrides:
-            self.config = settings.default.copy()
+            self.config = default.copy()
             self.config.update(setting_overrides)
 
         file_name = file_path
@@ -452,3 +501,89 @@ class SortImports(object):
                 for module in imports:
                     self.imports[
                         self.place_module(module)][import_type].add(module)
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description='Sort Python import definitions alphabetically within logical sections.')
+    parser.add_argument(
+        'files',
+        nargs='+',
+        help='One or more Python source files that need their imports sorted.')
+    parser.add_argument(
+        '-l', '--lines', help='The max length of an import line (used for wrapping long imports).',
+        dest='line_length', type=int)
+    parser.add_argument(
+        '-s',
+        '--skip',
+        help='Files that sort imports should skip over.',
+        dest='skip',
+        action='append')
+    parser.add_argument(
+        '-t', '--top', help='Force specific imports to the top of their appropriate section.',
+        dest='force_to_top', action='append')
+    parser.add_argument(
+        '-b', '--builtin', dest='known_standard_library', action='append',
+        help='Force sortImports to recognize a module as part of the python standard library.')
+    parser.add_argument(
+        '-o', '--thirdparty', dest='known_third_party', action='append',
+        help='Force sortImports to recognize a module as being part of a third party library.')
+    parser.add_argument(
+        '-p', '--project', dest='known_first_party', action='append',
+        help='Force sortImports to recognize a module as being part of the current python project.')
+    parser.add_argument(
+        '-m', '--multi_line', dest='multi_line_output', type=int, choices=[0, 1, 2, 3, 4, 5],
+        help='Multi line output (0-grid, 1-vertical, 2-hanging, 3-vert-hanging, 4-vert-grid, '
+        '5-vert-grid-grouped).')
+    parser.add_argument(
+        '--indent', help='String to place for indents defaults to "    " (4 spaces).',
+        dest='indent', type=str)
+    parser.add_argument('-a', '--add_import', dest='add_imports', action='append',
+                        help='Adds the specified import line to all files, automatically determining correct placement.')
+    parser.add_argument(
+        '-r', '--remove_import', dest='remove_imports', action='append',
+        help='Removes the specified import from all files.')
+    parser.add_argument(
+        '-ls', '--length_sort', help='Sort imports by their string length.',
+        dest='length_sort', action='store_true', default=False)
+    parser.add_argument(
+        '-d', '--stdout', help='Force resulting output to stdout, instead of in-place.',
+        dest='write_to_stdout', action='store_true')
+    parser.add_argument(
+        '-c', '--check-only', action='store_true', default=False, dest='check',
+        help='Checks the file for unsorted imports and prints them to the command line without modifying '
+        'the file.')
+    parser.add_argument('-sd', '--section-default', dest='default_section',
+                        help='Sets the default section for imports (by default FIRSTPARTY) options: ' + str(SECTION_NAMES))
+    parser.add_argument(
+        '-i', '--in-place', dest='show_diff', default=True, action='store_false',
+        help='Write change in place.')
+    parser.add_argument(
+        '-v',
+        '--version',
+        action='version',
+        version='isort {0}'.format(__version__))
+
+    arguments = dict((key, value)
+                     for (key, value) in vars(parser.parse_args()).items() if value)
+    file_names = arguments.pop('files', [])
+
+    if file_names == ['-']:
+        SortImports(
+            file_contents=sys.stdin.read(),
+            write_to_stdout=True,
+            **arguments)
+    else:
+        wrong_sorted_files = False
+        for file_name in file_names:
+            incorrectly_sorted = SortImports(
+                file_name,
+                **arguments).incorrectly_sorted
+            if arguments.get('check', False) and incorrectly_sorted:
+                wrong_sorted_files = True
+        if wrong_sorted_files:
+            return 1
+
+
+if __name__ == '__main__':
+    sys.exit(main())
