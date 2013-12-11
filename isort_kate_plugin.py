@@ -33,14 +33,16 @@ except ImportError:
 
 
 def sort_kate_imports(add_imports=(), remove_imports=()):
-    """
-        Sorts imports within Kate while maintaining cursor position, and selection, even if length of file changes.
-    """
+    """Sorts imports within Kate while maintaining cursor position, and
+    selection, even if length of file changes."""
     document = kate.activeDocument()
     view = document.activeView()
     position = view.cursorPosition()
     selection = view.selectionRange()
-    sorter = SortImports(file_contents=document.text(), add_imports=add_imports, remove_imports=remove_imports)
+    sorter = SortImports(
+        file_contents=document.text(),
+        add_imports=add_imports,
+        remove_imports=remove_imports)
     document.setText(sorter.output)
     position.setLine(position.line() + sorter.length_change)
     if selection:
@@ -53,24 +55,24 @@ def sort_kate_imports(add_imports=(), remove_imports=()):
     view.setCursorPosition(position)
 
 
-@kate.action(text="Sort Imports", shortcut="Ctrl+[", menu="Python")
+@kate.action(text='Sort Imports', shortcut='Ctrl+[', menu='Python')
 def sort_imports():
     sort_kate_imports()
 
 
-@kate.action(text="Add Import", shortcut="Ctrl+]", menu="Python")
+@kate.action(text='Add Import', shortcut='Ctrl+]', menu='Python')
 def add_imports():
     text, ok = QtGui.QInputDialog.getText(None,
                                           'Add Import',
                                           'Enter an import line to add (example: from os import path):')
     if ok:
-        sort_kate_imports(add_imports=text.split(";"))
+        sort_kate_imports(add_imports=text.split(';'))
 
 
-@kate.action(text="Remove Import", shortcut="Ctrl+Shift+]", menu="Python")
+@kate.action(text='Remove Import', shortcut='Ctrl+Shift+]', menu='Python')
 def remove_imports():
     text, ok = QtGui.QInputDialog.getText(None,
                                           'Remove Import',
                                           'Enter an import line to remove (example: os.path):')
     if ok:
-        sort_kate_imports(remove_imports=text.split(";"))
+        sort_kate_imports(remove_imports=text.split(';'))

@@ -2636,12 +2636,12 @@ QXr8Oyz+AQhx7I8=
 """
 
 import base64
-import imp
 import sys
 import zlib
 
 
 class DictImporter(object):
+
     def __init__(self, sources):
         self.sources = sources
 
@@ -2664,7 +2664,7 @@ class DictImporter(object):
 
         co = compile(s, fullname, 'exec')
         module = sys.modules.setdefault(fullname, ModuleType(fullname))
-        module.__file__ = "%s/%s" % (__file__, fullname)
+        module.__file__ = '%s/%s' % (__file__, fullname)
         module.__loader__ = self
         if is_pkg:
             module.__path__ = [fullname]
@@ -2678,19 +2678,19 @@ class DictImporter(object):
             res = self.sources.get(name + '.__init__')
         return res
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     if sys.version_info >= (3, 0):
-        exec("def do_exec(co, loc): exec(co, loc)\n")
+        exec('def do_exec(co, loc): exec(co, loc)\n')
         import pickle
-        sources = sources.encode("ascii") # ensure bytes
+        sources = sources.encode('ascii')  # ensure bytes
         sources = pickle.loads(zlib.decompress(base64.decodebytes(sources)))
     else:
         import cPickle as pickle
-        exec("def do_exec(co, loc): exec co in loc\n")
+        exec('def do_exec(co, loc): exec co in loc\n')
         sources = pickle.loads(zlib.decompress(base64.decodestring(sources)))
 
     importer = DictImporter(sources)
     sys.meta_path.insert(0, importer)
 
-    entry = "import py; raise SystemExit(py.test.cmdline.main())"
+    entry = 'import py; raise SystemExit(py.test.cmdline.main())'
     do_exec(entry, locals())
