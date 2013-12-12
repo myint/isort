@@ -27,6 +27,6 @@ setup(name='isort',
       download_url='https://github.com/timothycrosley/isort/archive/2.6.0.tar.gz',
       license='MIT',
       entry_points={'console_scripts': ['isort = isort:main']},
-      packages=['isort'],
+      py_modules=['isort'],
       cmdclass={'test': PyTest},
       **PyTest.extra_kwargs)
