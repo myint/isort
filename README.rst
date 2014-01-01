@@ -3,14 +3,11 @@ isort
 
 isort your python imports for you so you don't have to.
 
-isort is a Python utility / library to sort imports alphabetically, and
-automatically separated into sections. It provides a command line
-utility, Python library, Vim plugin, Sublime plugin, and Kate plugin to
-quickly sort all your imports.
-
 Before isort:
 
-::
+.. code-block:: python
+
+    from __future__ import absolute_import
 
     from my_lib import Object
 
@@ -28,15 +25,13 @@ Before isort:
 
     import sys
 
-    from __future__ import absolute_import
-
     from third_party import lib3
 
     print("yo")
 
 After isort:
 
-::
+.. code-block:: python
 
     from __future__ import absolute_import
 
@@ -56,11 +51,11 @@ Installing isort
 
 Installing isort is as simple as::
 
-    pip install git+https://github.com/myint/isort
+    $ pip install git+https://github.com/myint/isort
 
 Using isort
 ===========
 
 from the command line::
 
-    isort foo.py
+    $ isort foo.py
