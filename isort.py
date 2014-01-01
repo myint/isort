@@ -187,39 +187,39 @@ class SortImports(object):
             with codecs.open(self.file_path, encoding='utf-8', mode='w') as output_file:
                 output_file.write(self.output)
 
-    def place_module(self, moduleName):
+    def place_module(self, name):
         """Tries to determine if a module is a python std import,
            third party import, or project code:
            if it can't determine - it assumes it is project code
         """
-        if moduleName.startswith('.'):
+        if name.startswith('.'):
             return SECTIONS.LOCALFOLDER
 
-        index = moduleName.find('.')
+        index = name.find('.')
         if index:
-            firstPart = moduleName[:index]
+            first_part = name[:index]
         else:
-            firstPart = None
+            first_part = None
 
         for forced_separate in self.config['forced_separate']:
-            if moduleName.startswith(forced_separate):
+            if name.startswith(forced_separate):
                 return forced_separate
 
-        if moduleName == '__future__' or (firstPart == '__future__'):
+        if name == '__future__' or (first_part == '__future__'):
             return SECTIONS.FUTURE
-        elif moduleName in self.config['known_standard_library'] or \
-                (firstPart in self.config['known_standard_library']):
+        elif name in self.config['known_standard_library'] or \
+                (first_part in self.config['known_standard_library']):
             return SECTIONS.STDLIB
-        elif ((moduleName in self.config['known_third_party']) or
-              (firstPart in self.config['known_third_party'])):
+        elif ((name in self.config['known_third_party']) or
+              (first_part in self.config['known_third_party'])):
             return SECTIONS.THIRDPARTY
-        elif ((moduleName in self.config['known_first_party']) or
-              (firstPart in self.config['known_first_party'])):
+        elif ((name in self.config['known_first_party']) or
+              (first_part in self.config['known_first_party'])):
             return SECTIONS.FIRSTPARTY
 
         for prefix in PYTHONPATH:
-            module_path = '/'.join((prefix, moduleName.replace('.', '/')))
-            package_path = '/'.join((prefix, moduleName.split('.')[0]))
+            module_path = '/'.join((prefix, name.replace('.', '/')))
+            package_path = '/'.join((prefix, name.split('.')[0]))
             if (os.path.exists(module_path + '.py') or
                 os.path.exists(module_path + '.so') or
                 (os.path.exists(package_path) and
