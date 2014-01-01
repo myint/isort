@@ -140,7 +140,6 @@ class SortImports(object):
             return
 
         self.in_lines = file_contents.split('\n')
-        self.original_length = len(self.in_lines)
         for add_import in self.config['add_imports']:
             self.in_lines.append(add_import)
         self.number_of_lines = len(self.in_lines)
@@ -158,7 +157,6 @@ class SortImports(object):
         if self.import_index != -1:
             self._add_formatted_imports()
 
-        self.length_change = len(self.out_lines) - self.original_length
         while self.out_lines and self.out_lines[-1].strip() == '':
             self.out_lines.pop(-1)
         self.out_lines.append('')
@@ -427,86 +425,6 @@ def _module_key(module_name, config):
     module_name = str(module_name).lower()
     return '{0}{1}'.format(module_name in config['force_to_top'] and 'A' or 'B',
                            config['length_sort'] and (str(len(module_name)) + ':' + module_name) or module_name)
-
-
-def _output_grid(statement, imports, white_space, indent, line_length):
-    statement += '(' + imports.pop(0)
-    while imports:
-        next_import = imports.pop(0)
-        next_statement = statement + ', ' + next_import
-        if len(next_statement.split('\n')[-1]) + 1 > line_length:
-            next_statement = '{0},\n{1}{2}'.format(
-                statement,
-                white_space,
-                next_import)
-        statement = next_statement
-    return statement + ')'
-
-
-def _output_vertical(statement, imports, white_space, indent, line_length):
-    return (
-        '{0}({1})'.format(statement, (',\n' + white_space).join(imports))
-    )
-
-
-def _output_hanging_indent(
-        statement, imports, white_space, indent, line_length):
-    statement += ' ' + imports.pop(0)
-    while imports:
-        next_import = imports.pop(0)
-        next_statement = statement + ', ' + next_import
-        if len(next_statement.split('\n')[-1]) + 3 > line_length:
-            next_statement = '{0}, \\\n{1}{2}'.format(
-                statement,
-                indent,
-                next_import)
-        statement = next_statement
-    return statement
-
-
-def _output_vertical_hanging_indent(
-        statement, imports, white_space, indent, line_length):
-    return (
-        '{0}(\n{1}{2}\n)'.format(
-            statement,
-            indent,
-            (',\n' + indent).join(imports))
-    )
-
-
-def _output_vertical_grid_common(
-        statement, imports, white_space, indent, line_length):
-    statement += '(\n' + indent + imports.pop(0)
-    while imports:
-        next_import = imports.pop(0)
-        next_statement = '{0}, {1}'.format(statement, next_import)
-        if len(next_statement.split('\n')[-1]) + 1 > line_length:
-            next_statement = '{0},\n{1}{2}'.format(
-                statement,
-                indent,
-                next_import)
-        statement = next_statement
-    return statement
-
-
-def _output_vertical_grid(
-        statement, imports, white_space, indent, line_length):
-    return _output_vertical_grid_common(
-            statement,
-            imports,
-            white_space,
-            indent,
-            line_length) + ')'
-
-
-def _output_vertical_grid_grouped(
-        statement, imports, white_space, indent, line_length):
-    return _output_vertical_grid_common(
-            statement,
-            imports,
-            white_space,
-            indent,
-            line_length) + '\n)'
 
 
 def _strip_comments(line):
