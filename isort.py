@@ -111,7 +111,7 @@ class SortImports(object):
     config = default
     incorrectly_sorted = False
 
-    def __init__( self, file_path=None, file_contents=None,
+    def __init__(self, file_path=None, file_contents=None,
                  write_to_stdout=False, check=False, show_diff=False,
                  **setting_overrides):
         if setting_overrides:
@@ -242,26 +242,9 @@ class SortImports(object):
         self.index += 1
         return line
 
-    @staticmethod
-    def _import_type(line):
-        """If the current line is an import line it will return its type (from
-        or straight)"""
-        if 'isort:skip' in line:
-            return
-        elif line.startswith('import '):
-            return 'straight'
-        elif line.startswith('from ') and 'import' in line:
-            return 'from'
-
     def _at_end(self):
         """returns True if we are at the end of the file."""
         return self.index == self.number_of_lines
-
-    @staticmethod
-    def _module_key(module_name, config):
-        module_name = str(module_name).lower()
-        return '{0}{1}'.format(module_name in config['force_to_top'] and 'A' or 'B',
-                               config['length_sort'] and (str(len(module_name)) + ':' + module_name) or module_name)
 
     def _add_formatted_imports(self):
         """Adds the imports back to the file.
@@ -275,7 +258,7 @@ class SortImports(object):
             straight_modules = list(self.imports[section]['straight'])
             straight_modules = sorted(
                 straight_modules,
-                key=lambda key: self._module_key(
+                key=lambda key: _module_key(
                     key,
                     self.config))
 
@@ -292,7 +275,7 @@ class SortImports(object):
             from_modules = list(self.imports[section]['from'].keys())
             from_modules = sorted(
                 from_modules,
-                key=lambda key: self._module_key(
+                key=lambda key: _module_key(
                     key,
                     self.config))
             for module in from_modules:
@@ -303,7 +286,7 @@ class SortImports(object):
                 from_imports = list(self.imports[section]['from'][module])
                 from_imports = sorted(
                     from_imports,
-                    key=lambda key: self._module_key(
+                    key=lambda key: _module_key(
                         key,
                         self.config))
                 if self.config['remove_imports']:
@@ -355,102 +338,6 @@ class SortImports(object):
             else:
                 self.out_lines[imports_tail:0] = ['']
 
-    @staticmethod
-    def _output_grid(statement, imports, white_space, indent, line_length):
-        statement += '(' + imports.pop(0)
-        while imports:
-            next_import = imports.pop(0)
-            next_statement = statement + ', ' + next_import
-            if len(next_statement.split('\n')[-1]) + 1 > line_length:
-                next_statement = '{0},\n{1}{2}'.format(
-                    statement,
-                    white_space,
-                    next_import)
-            statement = next_statement
-        return statement + ')'
-
-    @staticmethod
-    def _output_vertical(statement, imports, white_space, indent, line_length):
-        return (
-            '{0}({1})'.format(statement, (',\n' + white_space).join(imports))
-        )
-
-    @staticmethod
-    def _output_hanging_indent(
-            statement, imports, white_space, indent, line_length):
-        statement += ' ' + imports.pop(0)
-        while imports:
-            next_import = imports.pop(0)
-            next_statement = statement + ', ' + next_import
-            if len(next_statement.split('\n')[-1]) + 3 > line_length:
-                next_statement = '{0}, \\\n{1}{2}'.format(
-                    statement,
-                    indent,
-                    next_import)
-            statement = next_statement
-        return statement
-
-    @staticmethod
-    def _output_vertical_hanging_indent(
-            statement, imports, white_space, indent, line_length):
-        return (
-            '{0}(\n{1}{2}\n)'.format(
-                statement,
-                indent,
-                (',\n' + indent).join(imports))
-        )
-
-    @staticmethod
-    def _output_vertical_grid_common(
-            statement, imports, white_space, indent, line_length):
-        statement += '(\n' + indent + imports.pop(0)
-        while imports:
-            next_import = imports.pop(0)
-            next_statement = '{0}, {1}'.format(statement, next_import)
-            if len(next_statement.split('\n')[-1]) + 1 > line_length:
-                next_statement = '{0},\n{1}{2}'.format(
-                    statement,
-                    indent,
-                    next_import)
-            statement = next_statement
-        return statement
-
-    @classmethod
-    def _output_vertical_grid(
-            cls, statement, imports, white_space, indent, line_length):
-        return (
-            cls._output_vertical_grid_common(
-                statement,
-                imports,
-                white_space,
-                indent,
-                line_length) + ')'
-        )
-
-    @classmethod
-    def _output_vertical_grid_grouped(
-            cls, statement, imports, white_space, indent, line_length):
-        return (
-            cls._output_vertical_grid_common(
-                statement,
-                imports,
-                white_space,
-                indent,
-                line_length) + '\n)'
-        )
-
-    @staticmethod
-    def _strip_comments(line):
-        """Removes comments from import line."""
-        comment_start = line.find('#')
-        if comment_start != -1:
-            print(
-                'Removing comment(%s) so imports can be sorted correctly' %
-                line[comment_start:], file=stderr)
-            line = line[:comment_start]
-
-        return line
-
     def _parse(self):
         """Parses a python file taking out and categorizing imports."""
         in_quote = False
@@ -476,7 +363,7 @@ class SortImports(object):
                         break
                     index += 1
 
-            import_type = self._import_type(line)
+            import_type = _import_type(line)
             if not import_type or skip_line:
                 self.out_lines.append(line)
                 continue
@@ -484,14 +371,14 @@ class SortImports(object):
             if self.import_index == -1:
                 self.import_index = self.index - 1
 
-            import_string = self._strip_comments(line)
+            import_string = _strip_comments(line)
             if '(' in line and not self._at_end():
                 while not line.strip().endswith(')') and not self._at_end():
-                    line = self._strip_comments(self._get_line())
+                    line = _strip_comments(self._get_line())
                     import_string += '\n' + line
             else:
                 while line.strip().endswith('\\'):
-                    line = self._strip_comments(self._get_line())
+                    line = _strip_comments(self._get_line())
                     import_string += '\n' + line
 
             import_string = import_string.replace('_import', '[[i]]')
@@ -523,6 +410,115 @@ class SortImports(object):
                 for module in imports:
                     self.imports[
                         self.place_module(module)][import_type].add(module)
+
+
+def _import_type(line):
+    """If the current line is an import line it will return its type (from
+    or straight)"""
+    if 'isort:skip' in line:
+        return
+    elif line.startswith('import '):
+        return 'straight'
+    elif line.startswith('from ') and 'import' in line:
+        return 'from'
+
+
+def _module_key(module_name, config):
+    module_name = str(module_name).lower()
+    return '{0}{1}'.format(module_name in config['force_to_top'] and 'A' or 'B',
+                           config['length_sort'] and (str(len(module_name)) + ':' + module_name) or module_name)
+
+
+def _output_grid(statement, imports, white_space, indent, line_length):
+    statement += '(' + imports.pop(0)
+    while imports:
+        next_import = imports.pop(0)
+        next_statement = statement + ', ' + next_import
+        if len(next_statement.split('\n')[-1]) + 1 > line_length:
+            next_statement = '{0},\n{1}{2}'.format(
+                statement,
+                white_space,
+                next_import)
+        statement = next_statement
+    return statement + ')'
+
+
+def _output_vertical(statement, imports, white_space, indent, line_length):
+    return (
+        '{0}({1})'.format(statement, (',\n' + white_space).join(imports))
+    )
+
+
+def _output_hanging_indent(
+        statement, imports, white_space, indent, line_length):
+    statement += ' ' + imports.pop(0)
+    while imports:
+        next_import = imports.pop(0)
+        next_statement = statement + ', ' + next_import
+        if len(next_statement.split('\n')[-1]) + 3 > line_length:
+            next_statement = '{0}, \\\n{1}{2}'.format(
+                statement,
+                indent,
+                next_import)
+        statement = next_statement
+    return statement
+
+
+def _output_vertical_hanging_indent(
+        statement, imports, white_space, indent, line_length):
+    return (
+        '{0}(\n{1}{2}\n)'.format(
+            statement,
+            indent,
+            (',\n' + indent).join(imports))
+    )
+
+
+def _output_vertical_grid_common(
+        statement, imports, white_space, indent, line_length):
+    statement += '(\n' + indent + imports.pop(0)
+    while imports:
+        next_import = imports.pop(0)
+        next_statement = '{0}, {1}'.format(statement, next_import)
+        if len(next_statement.split('\n')[-1]) + 1 > line_length:
+            next_statement = '{0},\n{1}{2}'.format(
+                statement,
+                indent,
+                next_import)
+        statement = next_statement
+    return statement
+
+
+def _output_vertical_grid(
+        statement, imports, white_space, indent, line_length):
+    return _output_vertical_grid_common(
+            statement,
+            imports,
+            white_space,
+            indent,
+            line_length) + ')'
+
+
+def _output_vertical_grid_grouped(
+        statement, imports, white_space, indent, line_length):
+    return _output_vertical_grid_common(
+            statement,
+            imports,
+            white_space,
+            indent,
+            line_length) + '\n)'
+
+
+def _strip_comments(line):
+    """Removes comments from import line."""
+    comment_start = line.find('#')
+    if comment_start != -1:
+        print(
+            'Removing comment(%s) so imports can be sorted correctly' %
+            line[comment_start:], file=stderr)
+        line = line[:comment_start]
+
+    return line
 
 
 def main():
