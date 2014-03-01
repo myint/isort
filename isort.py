@@ -68,7 +68,7 @@ WrapModes = namedtuple('WrapModes', WrapModes)(*range(len(WrapModes)))
 # Note that none of these lists must be complete as they are simply
 # fallbacks for when included auto-detection fails.
 default = {'force_to_top': [],
-           'skip': ['__init__.py', ],
+           'skip': [],
            'line_length': 80,
            'known_standard_library': [
                'abc', 'anydbm', 'argparse', 'array', 'asynchat', 'asyncore',
